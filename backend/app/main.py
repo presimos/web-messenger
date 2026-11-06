@@ -1,8 +1,18 @@
-"""Minimal API foundation for the web messenger project."""
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-app = FastAPI(title="Web Messenger API", version="0.1.0")
+from app.database import Base, engine
+from app import models
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title="Web Messenger API", version="0.2.0", lifespan=lifespan)
 
 
 @app.get("/", tags=["system"])
