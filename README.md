@@ -17,19 +17,37 @@ uvicorn app.main:app --reload
 Проверка: открыть `http://127.0.0.1:8000/health`. Документация API доступна
 по адресу `http://127.0.0.1:8000/docs`.
 
+## Запуск клиента
+
+В отдельном окне PowerShell:
+
+```powershell
+cd frontend\client
+pnpm install
+pnpm dev
+```
+
+Vite запускает страницу на `http://localhost:5173`. Backend и клиент нужно
+запустить в двух окнах терминала.
+
+Адрес backend по умолчанию — `http://127.0.0.1:8000`. При необходимости
+создайте `frontend/client/.env` по образцу `.env.example`.
+
 ## Этапы разработки
 
 1. Каркас проекта и проверка запуска API.
 2. Подключение SQLAlchemy и модели пользователей, чатов и сообщений.
 3. Регистрация, вход пользователей и проверка JWT.
 4. Чаты, история и обмен сообщениями через WebSocket.
-5. Клиент на React и TypeScript.
+5. Клиент на React и TypeScript с адаптацией для мобильного экрана.
 6. Проверки Pytest и описание результата.
 
 По умолчанию backend создаёт локальную базу SQLite. Для PostgreSQL задайте
 `DATABASE_URL` по образцу `backend/.env.example` в файле `backend/.env`.
 
 Проверки backend запускаются командой `python -m pytest` из папки `backend`.
+Сборка клиента проверяется командами `pnpm build` и `pnpm lint` из папки
+`frontend/client`.
 
 Каждый завершённый этап фиксируется отдельным коммитом.
 
