@@ -47,3 +47,29 @@ def test_chat_and_websocket_require_membership(client):
         with client.websocket_connect(f"/ws/chats/{chat_id}?token={stranger_token}"):
             assert False, "Подключение без членства должно быть отклонено"
     assert error.value.code == 4403
+
+
+def test_websocket_rejects_invalid_token(client):
+    with pytest.raises(WebSocketDisconnect) as error:
+        with client.websocket_connect("/ws/chats/1?token=invalid.token.value"):
+            assert False, "Подключение с недействительным токеном должно быть отклонено"
+
+    assert error.value.code == 4401
+
+
+def test_invalid_messages_are_rejected_without_persistence(client):
+    token = register_and_login(client, "sender")
+    headers = {"Authorization": f"Bearer {token}"}
+    chat_id = client.post("/chats", headers=headers, json={}).json()["id"]
+
+    with client.websocket_connect(f"/ws/chats/{chat_id}?token={token}") as websocket:
+        websocket.send_json({"body": "   "})
+        assert websocket.receive_json() == {"error": "Передано неверное сообщение"}
+        websocket.send_json({"body": "x" * 5001})
+        assert websocket.receive_json() == {"error": "Передано неверное сообщение"}
+        websocket.send_json({"body": "Корректное сообщение"})
+        delivered = websocket.receive_json()
+
+    assert delivered["body"] == "Корректное сообщение"
+    history = client.get(f"/chats/{chat_id}/messages", headers=headers)
+    assert [message["body"] for message in history.json()] == ["Корректное сообщение"]

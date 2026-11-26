@@ -38,3 +38,21 @@ def test_invalid_login_and_missing_token_are_rejected(client):
 
     assert invalid_login.status_code == 401
     assert client.get("/auth/me").status_code == 401
+
+
+def test_malformed_token_is_rejected(client):
+    response = client.get(
+        "/auth/me",
+        headers={"Authorization": "Bearer invalid.token.value"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_registration_rejects_short_password(client):
+    response = client.post(
+        "/auth/register",
+        json={"username": "demo", "password": "short"},
+    )
+
+    assert response.status_code == 422
