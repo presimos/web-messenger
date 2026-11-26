@@ -81,6 +81,7 @@ button { cursor: pointer; }
 .status-dot { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #c2c9c1; vertical-align: 1px; }
 .status-dot.online { background: #65b67b; box-shadow: 0 0 0 3px #eaf6ec; }
 .status-dot.connecting { background: #e0b04d; }
+.reconnect-button { width: fit-content; padding: 0; border: 0; color: #4e7860; background: transparent; font: inherit; font-size: 10px; text-decoration: underline; cursor: pointer; }
 .header-actions { display: flex; gap: 8px; }
 .header-actions button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #edf0eb; border-radius: 9px; color: #77847a; background: white; font-size: 17px; }
 .message-area { position: relative; display: flex; flex: 1; flex-direction: column; overflow: auto; padding: 22px clamp(20px,6vw,92px) 25px; }

@@ -38,6 +38,7 @@ function App() {
   const [members, setMembers] = useState('')
   const [showNewChat, setShowNewChat] = useState(false)
   const [connection, setConnection] = useState<'connecting' | 'online' | 'offline'>('offline')
+  const [reconnectAttempt, setReconnectAttempt] = useState(0)
   const [error, setError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const socket = useRef<WebSocket | null>(null)
@@ -82,7 +83,7 @@ function App() {
       socket.current = null
       setConnection('offline')
     }
-  }, [token, activeChat])
+  }, [token, activeChat, reconnectAttempt])
 
   useEffect(() => { messageEnd.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
@@ -123,6 +124,12 @@ function App() {
     const body = draft.trim()
     if (!body || socket.current?.readyState !== WebSocket.OPEN) return
     socket.current.send(JSON.stringify({ body })); setDraft('')
+  }
+
+  function reconnectChat() {
+    setError('')
+    setConnection('connecting')
+    setReconnectAttempt((attempt) => attempt + 1)
   }
 
   const visibleChats = useMemo(() => chats.filter((chat) => chat.title.toLowerCase().includes(search.toLowerCase())), [chats, search])
@@ -175,7 +182,7 @@ function App() {
       <section className="conversation">
         <header className="conversation-header">
           <button className="mobile-menu-button" type="button" onClick={() => setSidebarOpen(true)} aria-label="Открыть список чатов">☰</button>
-          {selectedChat ? <><span className="avatar avatar-header">{initials(selectedChat.title)}</span><div className="conversation-title"><h2>{selectedChat.title}</h2><span><i className={`status-dot ${connection}`} />{connection === 'online' ? 'в сети' : connection === 'connecting' ? 'подключение…' : 'не в сети'}</span></div><div className="header-actions"><button type="button" aria-label="Поиск">⌕</button><button type="button" aria-label="Ещё">···</button></div></> : <div className="conversation-title"><h2>Ваши сообщения</h2><span>Выберите чат или начните новый</span></div>}
+          {selectedChat ? <><span className="avatar avatar-header">{initials(selectedChat.title)}</span><div className="conversation-title"><h2>{selectedChat.title}</h2><span><i className={`status-dot ${connection}`} />{connection === 'online' ? 'в сети' : connection === 'connecting' ? 'подключение…' : 'не в сети'}</span>{connection === 'offline' && <button type="button" className="reconnect-button" onClick={reconnectChat}>Повторить подключение</button>}</div><div className="header-actions"><button type="button" aria-label="Поиск">⌕</button><button type="button" aria-label="Ещё">···</button></div></> : <div className="conversation-title"><h2>Ваши сообщения</h2><span>Выберите чат или начните новый</span></div>}
         </header>
         <div className="message-area">
           {selectedChat ? <><div className="day-divider"><span /><p>НАЧАЛО РАЗГОВОРА</p><span /></div>
